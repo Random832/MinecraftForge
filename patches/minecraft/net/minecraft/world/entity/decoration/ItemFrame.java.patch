@@ -1,0 +1,29 @@
+--- a/net/minecraft/world/entity/decoration/ItemFrame.java
++++ b/net/minecraft/world/entity/decoration/ItemFrame.java
+@@ -437,4 +_,26 @@
+       int i = direction.m_122434_().m_122478_() ? 90 * direction.m_122421_().m_122540_() : 0;
+       return (float)Mth.m_14098_(180 + direction.m_122416_() * 90 + this.m_31823_() * 45 + i);
+    }
++
++   // Forge Start
++   private net.minecraftforge.common.util.LazyOptional<?> inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
++
++   @Override
++   public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction facing) {
++      if (this.m_6084_() && capability == net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.ENTITY_INVENTORY_CAPABILITY)
++         return inventoryManager.cast();
++      return super.getCapability(capability, facing);
++   }
++
++   @Override
++   public void invalidateCaps() {
++      super.invalidateCaps();
++      inventoryManager.invalidate();
++   }
++
++   @Override
++   public void reviveCaps() {
++      super.reviveCaps();
++      inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
++   }
+ }

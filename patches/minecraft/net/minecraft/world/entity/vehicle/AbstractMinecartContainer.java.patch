@@ -9,18 +9,25 @@
        return this.m_219931_(this::m_146852_, p_38232_);
     }
  
-@@ -119,6 +_,28 @@
+@@ -119,6 +_,37 @@
     }
  
     protected abstract AbstractContainerMenu m_7402_(int p_38222_, Inventory p_38223_);
 +
 +   // Forge Start
 +   private net.minecraftforge.common.util.LazyOptional<?> itemHandler = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.wrapper.InvWrapper(this));
++   private net.minecraftforge.common.util.LazyOptional<?> inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
 +
 +   @Override
 +   public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction facing) {
-+      if (this.m_6084_() && capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-+         return itemHandler.cast();
++      if (this.m_6084_())
++      {
++         if (capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
++            return itemHandler.cast();
++         else if (capability == net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.ENTITY_INVENTORY_CAPABILITY)
++            return inventoryManager.cast();
++      }
++
 +      return super.getCapability(capability, facing);
 +   }
 +
@@ -28,12 +35,14 @@
 +   public void invalidateCaps() {
 +      super.invalidateCaps();
 +      itemHandler.invalidate();
++      inventoryManager.invalidate();
 +   }
 +
 +   @Override
 +   public void reviveCaps() {
 +      super.reviveCaps();
 +      itemHandler = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.wrapper.InvWrapper(this));
++      inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
 +   }
  
     @Nullable

@@ -12,3 +12,31 @@
     }
  
     protected void m_7996_() {
+@@ -233,5 +_,27 @@
+ 
+    public boolean m_183595_() {
+       return this.f_19853_.f_46443_;
++   }
++
++   // Forge Start
++   private net.minecraftforge.common.util.LazyOptional<?> inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.InventoryCarrierInventoryManager::new);
++
++   @Override
++   public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction facing) {
++      if (this.m_6084_() && capability == net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.ENTITY_INVENTORY_CAPABILITY)
++         return inventoryManager.cast();
++      return super.getCapability(capability, facing);
++   }
++
++   @Override
++   public void invalidateCaps() {
++      super.invalidateCaps();
++      inventoryManager.invalidate();
++   }
++
++   @Override
++   public void reviveCaps() {
++      super.reviveCaps();
++      inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.InventoryCarrierInventoryManager::new);
+    }
+ }

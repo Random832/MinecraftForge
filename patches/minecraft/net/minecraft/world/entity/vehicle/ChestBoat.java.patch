@@ -1,17 +1,24 @@
 --- a/net/minecraft/world/entity/vehicle/ChestBoat.java
 +++ b/net/minecraft/world/entity/vehicle/ChestBoat.java
-@@ -187,4 +_,26 @@
+@@ -187,4 +_,35 @@
     public void m_213775_() {
        this.f_219864_ = NonNullList.m_122780_(this.m_6643_(), ItemStack.f_41583_);
     }
 +
 +   // Forge Start
 +   private net.minecraftforge.common.util.LazyOptional<?> itemHandler = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.wrapper.InvWrapper(this));
++   private net.minecraftforge.common.util.LazyOptional<?> inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
 +
 +   @Override
 +   public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction facing) {
-+      if (this.m_6084_() && capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-+         return itemHandler.cast();
++      if (this.m_6084_())
++      {
++         if (capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
++            return itemHandler.cast();
++         else if (capability == net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.ENTITY_INVENTORY_CAPABILITY)
++            return inventoryManager.cast();
++      }
++
 +      return super.getCapability(capability, facing);
 +   }
 +
@@ -19,11 +26,13 @@
 +   public void invalidateCaps() {
 +      super.invalidateCaps();
 +      itemHandler.invalidate();
++      inventoryManager.invalidate();
 +   }
 +
 +   @Override
 +   public void reviveCaps() {
 +      super.reviveCaps();
 +      itemHandler = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.wrapper.InvWrapper(this));
++      inventoryManager = net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.create(this, net.minecraftforge.items.entityinventory.SimpleInventoryManager::new);
 +   }
  }

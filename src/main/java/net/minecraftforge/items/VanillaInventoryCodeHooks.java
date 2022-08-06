@@ -5,6 +5,8 @@
 
 package net.minecraftforge.items;
 
+import net.minecraft.world.WorldlyContainerHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.item.ItemStack;
@@ -17,11 +19,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public class VanillaInventoryCodeHooks
@@ -229,22 +235,35 @@ public class VanillaInventoryCodeHooks
         return true;
     }
 
-    public static Optional<Pair<IItemHandler, Object>> getItemHandler(Level worldIn, double x, double y, double z, final Direction side)
+    public static Optional<Pair<IItemHandler, Object>> getItemHandler(Level level, double x, double y, double z, final Direction side)
     {
         int i = Mth.floor(x);
         int j = Mth.floor(y);
         int k = Mth.floor(z);
         BlockPos blockpos = new BlockPos(i, j, k);
-        net.minecraft.world.level.block.state.BlockState state = worldIn.getBlockState(blockpos);
+        BlockState state = level.getBlockState(blockpos);
+
+        if (state.getBlock() instanceof WorldlyContainerHolder composter) {
+            // Note: This handler is only valid for a single operation on the current state of the composter.
+            // This is fine here since it's to be used immediately, but is not suitable for a general implementation of
+            // block/level/pos capabilities.
+            return Optional.of(Pair.of(new SidedInvWrapper(composter.getContainer(state, level, blockpos), side), composter));
+        }
 
         if (state.hasBlockEntity())
         {
-            BlockEntity blockEntity = worldIn.getBlockEntity(blockpos);
+            BlockEntity blockEntity = level.getBlockEntity(blockpos);
             if (blockEntity != null)
             {
                 return blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side)
                     .map(capability -> ImmutablePair.<IItemHandler, Object>of(capability, blockEntity));
             }
+        }
+
+        List<Entity> list = level.getEntities((Entity) null, new AABB(x - .5, y - .5, z - .5, x + .5, y + .5, z + .5), e -> e.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side).isPresent());
+        if (!list.isEmpty()) {
+            final Entity entity = list.get(level.random.nextInt(list.size()));
+            return entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side).map(handler -> ImmutablePair.of(handler, entity));
         }
 
         return Optional.empty();

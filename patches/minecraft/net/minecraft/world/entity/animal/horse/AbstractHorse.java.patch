@@ -4,7 +4,7 @@
  
        this.f_30520_.m_19164_(this);
        this.m_7493_();
-+      this.itemHandler = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.wrapper.InvWrapper(this.f_30520_));
++      this.inventoryManager = net.minecraftforge.common.util.LazyOptional.of(() -> new net.minecraftforge.items.entityinventory.HorseInventoryManager(this, f_30520_));
     }
  
     protected void m_7493_() {
@@ -34,21 +34,21 @@
        return super.m_6518_(p_30555_, p_30556_, p_30557_, p_30558_, p_30559_);
 +   }
 +
-+   private net.minecraftforge.common.util.LazyOptional<?> itemHandler = null;
++   private net.minecraftforge.common.util.LazyOptional<?> inventoryManager = null;
 +
 +   @Override
 +   public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction facing) {
-+      if (this.m_6084_() && capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && itemHandler != null)
-+         return itemHandler.cast();
++      if (this.m_6084_() && capability == net.minecraftforge.items.entityinventory.CapabilityEntityInventoryManager.ENTITY_INVENTORY_CAPABILITY && inventoryManager != null)
++         return inventoryManager.cast();
 +      return super.getCapability(capability, facing);
 +   }
 +
 +   @Override
 +   public void invalidateCaps() {
 +      super.invalidateCaps();
-+      if (itemHandler != null) {
-+         net.minecraftforge.common.util.LazyOptional<?> oldHandler = itemHandler;
-+         itemHandler = null;
++      if (inventoryManager != null) {
++         net.minecraftforge.common.util.LazyOptional<?> oldHandler = inventoryManager;
++         inventoryManager = null;
 +         oldHandler.invalidate();
 +      }
     }
